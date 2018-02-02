@@ -9,22 +9,32 @@ type ResourceLimitConfig struct {
 	MemeryLimits string
 }
 
+var tasksFileName = "tasks"
+var memoryLimitsFileName = "memory.limit_in_bytes"
+var cpuSharesFileName = "cpu.shares"
+var cpusetLimitsFileName = "cpuset.cpus"
+
 /*
-Subsystem Interface describe the functions of subsystem
+SubSystem Interface describe the functions of subsystem
 */
-type Subsystem interface {
+type SubSystem interface {
 	// get the name of subsystem
 	GetName() string
 	// set a cgroup into the subsystem
-	Set(path string, res *ResourceLimitConfig) error
+	Set(cgroupPath string, res *ResourceLimitConfig) error
 	// remove a cgroup from the subsystem
-	Remove(path string) error
+	Remove(cgroupPath string) error
 	// add a process into the cgroup
-	Apply(path string, pid int) error
+	Apply(cgroupPath string, pid int) error
 }
 
+/*
+SubSystemIns array for all kinds of Subsystems
+*/
 var (
-	SubsystemIns = []Subsystem{
+	SubSystemIns = []SubSystem{
 		&MemorySubSystem{},
+		&CpuSubSystem{},
+		&CpusetSubSystem{},
 	}
 )

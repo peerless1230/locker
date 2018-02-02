@@ -13,18 +13,18 @@ import (
 )
 
 /*
-MemorySubSystem implemented Subsystem interface
+CpusetSubSystem implemented Subsystem interface
 */
-type MemorySubSystem struct {
+type CpusetSubSystem struct {
 }
 
 /*
 GetName used to return the name of subsystem
 Params:
-Return: "memory"
+Return: "cpuset"
 */
-func (subsys *MemorySubSystem) GetName() string {
-	return "memory"
+func (subsys *CpusetSubSystem) GetName() string {
+	return "cpuset"
 }
 
 /*
@@ -32,16 +32,16 @@ Set the cgroup's limit config
 Params: cgroupPath string, res *ResourceLimitConfig
 Return: error
 */
-func (subsys *MemorySubSystem) Set(cgroupPath string, res *ResourceLimitConfig) error {
+func (subsys *CpusetSubSystem) Set(cgroupPath string, res *ResourceLimitConfig) error {
 	subsysCgroupPath, err := GetCgroupPath(subsys.GetName(), cgroupPath, true)
 	if err == nil {
 		// Write the limits to cgroup's config file
 		if res.MemeryLimits != "" {
-			limitsFilePath := path.Join(subsysCgroupPath, memoryLimitsFileName)
-			if err := ioutil.WriteFile(limitsFilePath, []byte(res.MemeryLimits), 0644); err == nil {
-				log.Debugf("Write memory Limits: %s to %s", res.MemeryLimits, limitsFilePath)
+			limitsFilePath := path.Join(subsysCgroupPath, cpusetLimitsFileName)
+			if err := ioutil.WriteFile(limitsFilePath, []byte(res.CpuSet), 0644); err == nil {
+				log.Debugf("Write cpuset share: %s to %s", res.MemeryLimits, limitsFilePath)
 			} else {
-				return fmt.Errorf("Set memory limits failed: %v", err)
+				return fmt.Errorf("Set cpuset share failed: %v", err)
 			}
 			return nil
 		}
@@ -55,7 +55,7 @@ Remove used to remove subsystem by the cgroup path
 Params: cgroupPath string
 Return: error
 */
-func (subsys *MemorySubSystem) Remove(cgroupPath string) error {
+func (subsys *CpusetSubSystem) Remove(cgroupPath string) error {
 	subsysCgroupPath, err := GetCgroupPath(subsys.GetName(), cgroupPath, false)
 	if err == nil {
 		return os.RemoveAll(subsysCgroupPath)
@@ -68,7 +68,7 @@ Apply used to add a process into the cgroup
 Params: cgroupPath string, pid int
 Return: error
 */
-func (subsys *MemorySubSystem) Apply(cgroupPath string, pid int) error {
+func (subsys *CpusetSubSystem) Apply(cgroupPath string, pid int) error {
 	if subsysCgroupPath, err := GetCgroupPath(subsys.GetName(), cgroupPath, false); err == nil {
 		tasksFilePath := path.Join(subsysCgroupPath, tasksFileName)
 		var taskFile *os.File

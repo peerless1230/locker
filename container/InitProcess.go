@@ -1,10 +1,10 @@
 package container
 
 import (
+	"locker/common"
 	"os"
 	"syscall"
 
-	"../common"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -20,10 +20,10 @@ func NewContainerInitProcess(command string) error {
 	log.Infof("Command: %s", command)
 	args := []string{"/bin/sh", "-c", command}
 	log.Infof("SetHostname")
-	common.Check(syscall.Sethostname([]byte("test")))
+	common.CheckError(syscall.Sethostname([]byte("test")))
 	log.Infof("Chroot")
-	common.Check(syscall.Chroot("/home/encore/busybox"))
-	common.Check(os.Chdir("/"))
+	common.CheckError(syscall.Chroot("/home/encore/busybox"))
+	common.CheckError(os.Chdir("/"))
 	mountFlags := syscall.MS_NOEXEC | syscall.MS_NODEV | syscall.MS_NOSUID
 	log.Infof("Mount /proc")
 	syscall.Mount("proc", "proc", "proc", uintptr(mountFlags), "")
@@ -33,7 +33,7 @@ func NewContainerInitProcess(command string) error {
 	log.Infof("Exec cmd: %s", cmd)
 	log.Infof("Exec args: %s", args)
 	syscall.Exec(cmd, args, os.Environ())
-	//common.Check(cmd.Run())
+	//common.CheckError(cmd.Run())
 	log.Infof("Umount /proc")
 	syscall.Unmount("proc", 0)
 	return nil

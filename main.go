@@ -3,7 +3,8 @@ package main
 import (
 	"os"
 
-	"./common"
+	"common"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
 )
@@ -21,5 +22,5 @@ func main() {
 		log.SetOutput(os.Stdout)
 		return nil
 	}
-	common.Check(app.Run(os.Args))
+	common.CheckError(app.Run(os.Args))
 }

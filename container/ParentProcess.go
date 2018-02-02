@@ -5,7 +5,8 @@ import (
 	"os/exec"
 	"syscall"
 
-	"../common"
+	"locker/common"
+
 	log "github.com/Sirupsen/logrus"
 )
 
