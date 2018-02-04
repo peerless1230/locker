@@ -1,7 +1,7 @@
 package cgroups
 
 import (
-	"locker/cgroups/subsystems"
+	"github.com/peerless1230/locker/cgroups/subsystems"
 
 	log "github.com/Sirupsen/logrus"
 )

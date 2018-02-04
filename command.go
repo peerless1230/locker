@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"./container"
+	"github.com/peerless1230/locker/container"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -13,7 +13,7 @@ var runCommand = cli.Command{
 	Name: "run",
 	//Usage: "Create a Docker-liked container\nlocker run -it [command],
 	Usage: `Create a Docker-liked container
-		locker run -it [command]`,
+		locker run -[option, -option] [command]`,
 
 	Flags: []cli.Flag{
 		cli.BoolFlag{
@@ -27,6 +27,34 @@ var runCommand = cli.Command{
 		cli.BoolFlag{
 			Name:  "it",
 			Usage: "enable interactive tty to container",
+		},
+		cli.BoolFlag{
+			Name:  "m",
+			Usage: "Memory limit",
+		},
+		cli.BoolFlag{
+			Name:  "memory",
+			Usage: "Memory limit",
+		},
+		cli.BoolFlag{
+			Name:  "cpu-shares",
+			Usage: "CPU shares (relative weight)",
+		},
+		cli.BoolFlag{
+			Name:  "cpuset-cpus",
+			Usage: " CPUs in which to allow execution (0-3, 0,1)",
+		},
+		cli.BoolFlag{
+			Name:  "cpu-period",
+			Usage: "Limit CPU CFS (Completely Fair Scheduler) period",
+		},
+		cli.BoolFlag{
+			Name:  "cpu-quota",
+			Usage: "Limit CPU CFS (Completely Fair Scheduler) quota",
+		},
+		cli.BoolFlag{
+			Name:  "cpus",
+			Usage: "Number of CPUs",
 		},
 	},
 	Action: func(context *cli.Context) error {

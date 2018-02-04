@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"syscall"
 
-	"locker/common"
+	"github.com/peerless1230/locker/common"
 
 	log "github.com/Sirupsen/logrus"
 )

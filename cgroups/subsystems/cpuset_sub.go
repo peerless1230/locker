@@ -7,7 +7,7 @@ import (
 	"path"
 	"strconv"
 
-	"locker/common"
+	"github.com/peerless1230/locker/common"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -39,7 +39,7 @@ func (subsys *CpusetSubSystem) Set(cgroupPath string, res *ResourceLimitConfig) 
 		if res.MemeryLimits != "" {
 			limitsFilePath := path.Join(subsysCgroupPath, cpusetLimitsFileName)
 			if err := ioutil.WriteFile(limitsFilePath, []byte(res.CpuSet), 0644); err == nil {
-				log.Debugf("Write cpuset share: %s to %s", res.MemeryLimits, limitsFilePath)
+				log.Debugf("Write cpuset share: %s to %s", res.CpuSet, limitsFilePath)
 			} else {
 				return fmt.Errorf("Set cpuset share failed: %v", err)
 			}

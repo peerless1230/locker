@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"common"
+	"github.com/peerless1230/locker/common"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"

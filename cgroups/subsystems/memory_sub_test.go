@@ -8,9 +8,11 @@ import (
 var testMemSub = &MemorySubSystem{}
 var testResConfig = ResourceLimitConfig{
 	MemeryLimits: "200m",
+	CpuShare:     "512",
+	CpuSet:       "0,2",
 }
-var testCgroup = "testmemorycgroup"
-var testSecondCgroup = "testsecondmemorycgroup"
+var testCgroup = "testcgroup"
+var testSecondCgroup = "secondtestcgroup"
 
 /*
 TestGetName used to test the return of MemorySubSystem.GetName
