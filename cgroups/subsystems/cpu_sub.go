@@ -19,6 +19,20 @@ type CpuSubSystem struct {
 }
 
 /*
+setCPULimit config CPU limit by the params
+Params:
+Return: "cpu"
+*/
+func setCPULimit(limitConfig string, limitsFilePath string) error {
+	if err := ioutil.WriteFile(limitsFilePath, []byte(limitConfig), 0644); err == nil {
+		log.Debugf("Write cpu limit: %s to %s", limitConfig, limitsFilePath)
+	} else {
+		return fmt.Errorf("Set cpu limit failed: %v", err)
+	}
+	return nil
+}
+
+/*
 GetName used to return the name of subsystem
 Params:
 Return: "cpu"
@@ -35,15 +49,39 @@ Return: error
 func (subsys *CpuSubSystem) Set(cgroupPath string, res *ResourceLimitConfig) error {
 	subsysCgroupPath, err := GetCgroupPath(subsys.GetName(), cgroupPath, true)
 	if err == nil {
-		// Write the limits to cgroup's config file
-		if res.CpuShare != "" {
+		if res.CPUShare != "" {
 			limitsFilePath := path.Join(subsysCgroupPath, cpuSharesFileName)
-			if err := ioutil.WriteFile(limitsFilePath, []byte(res.CpuShare), 0644); err == nil {
-				log.Debugf("Write cpu share: %s to %s", res.CpuShare, limitsFilePath)
-			} else {
-				return fmt.Errorf("Set cpu share failed: %v", err)
-			}
+			err = setCPULimit(res.CPUShare, limitsFilePath)
+		}
+	}
+	if err == nil {
+		if res.CPUS != "" {
+			limitsFilePath := path.Join(subsysCgroupPath, cpuPeriodFileName)
+			err = setCPULimit("100000", limitsFilePath)
+			common.CheckError(err)
+			//var n float32
+			var strCPUQuota string
+			limitsFilePath = path.Join(subsysCgroupPath, cpuQuotaFileName)
+			n, err := strconv.ParseFloat(res.CPUS, 32)
+			common.CheckError(err)
+			CPUQuota := 100000 * n
+			strCPUQuota = strconv.Itoa(int(CPUQuota))
+			err = setCPULimit(strCPUQuota, limitsFilePath)
+			common.CheckError(err)
 			return nil
+
+		}
+	}
+	if err == nil {
+		if res.CPUPeriod != "" {
+			limitsFilePath := path.Join(subsysCgroupPath, cpuPeriodFileName)
+			err = setCPULimit(res.CPUPeriod, limitsFilePath)
+		}
+	}
+	if err == nil {
+		if res.CPUQuota != "" {
+			limitsFilePath := path.Join(subsysCgroupPath, cpuQuotaFileName)
+			err = setCPULimit(res.CPUQuota, limitsFilePath)
 		}
 	}
 

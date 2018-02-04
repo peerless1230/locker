@@ -36,10 +36,10 @@ func (subsys *MemorySubSystem) Set(cgroupPath string, res *ResourceLimitConfig) 
 	subsysCgroupPath, err := GetCgroupPath(subsys.GetName(), cgroupPath, true)
 	if err == nil {
 		// Write the limits to cgroup's config file
-		if res.MemeryLimits != "" {
+		if res.MemoryLimits != "" {
 			limitsFilePath := path.Join(subsysCgroupPath, memoryLimitsFileName)
-			if err := ioutil.WriteFile(limitsFilePath, []byte(res.MemeryLimits), 0644); err == nil {
-				log.Debugf("Write memory Limits: %s to %s", res.MemeryLimits, limitsFilePath)
+			if err := ioutil.WriteFile(limitsFilePath, []byte(res.MemoryLimits), 0644); err == nil {
+				log.Debugf("Write memory Limits: %s to %s", res.MemoryLimits, limitsFilePath)
 			} else {
 				return fmt.Errorf("Set memory limits failed: %v", err)
 			}

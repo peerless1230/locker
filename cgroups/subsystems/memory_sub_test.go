@@ -7,9 +7,12 @@ import (
 
 var testMemSub = &MemorySubSystem{}
 var testResConfig = ResourceLimitConfig{
-	MemeryLimits: "200m",
-	CpuShare:     "512",
-	CpuSet:       "0,2",
+	MemoryLimits: "200m",
+	CPUShare:     "512",
+	CPUSet:       "0,2",
+	CPUS:         "1.5",
+	CPUPeriod:    "10000",
+	CPUQuota:     "15000",
 }
 var testCgroup = "testcgroup"
 var testSecondCgroup = "secondtestcgroup"

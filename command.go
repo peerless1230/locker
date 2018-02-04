@@ -54,7 +54,7 @@ var runCommand = cli.Command{
 		},
 		cli.BoolFlag{
 			Name:  "cpus",
-			Usage: "Number of CPUs",
+			Usage: `Number of CPU. This is the equivalent of setting --cpu-period="100000" and --cpu-quota="n*100000"`,
 		},
 	},
 	Action: func(context *cli.Context) error {

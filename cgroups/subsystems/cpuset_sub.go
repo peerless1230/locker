@@ -36,10 +36,10 @@ func (subsys *CpusetSubSystem) Set(cgroupPath string, res *ResourceLimitConfig) 
 	subsysCgroupPath, err := GetCgroupPath(subsys.GetName(), cgroupPath, true)
 	if err == nil {
 		// Write the limits to cgroup's config file
-		if res.MemeryLimits != "" {
+		if res.MemoryLimits != "" {
 			limitsFilePath := path.Join(subsysCgroupPath, cpusetLimitsFileName)
-			if err := ioutil.WriteFile(limitsFilePath, []byte(res.CpuSet), 0644); err == nil {
-				log.Debugf("Write cpuset share: %s to %s", res.CpuSet, limitsFilePath)
+			if err := ioutil.WriteFile(limitsFilePath, []byte(res.CPUSet), 0644); err == nil {
+				log.Debugf("Write cpuset share: %s to %s", res.CPUSet, limitsFilePath)
 			} else {
 				return fmt.Errorf("Set cpuset share failed: %v", err)
 			}

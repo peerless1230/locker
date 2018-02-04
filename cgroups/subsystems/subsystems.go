@@ -4,14 +4,20 @@ package subsystems
 ResourceLimitConfig indicate the set of limited Resource
 */
 type ResourceLimitConfig struct {
-	CpuSet       string
-	CpuShare     string
-	MemeryLimits string
+	CPUSet       string
+	CPUShare     string
+	CPUS         string
+	CPUQuota     string
+	CPUPeriod    string
+	MemoryLimits string
 }
 
+// file names of cgroup files
 var tasksFileName = "tasks"
 var memoryLimitsFileName = "memory.limit_in_bytes"
 var cpuSharesFileName = "cpu.shares"
+var cpuQuotaFileName = "cpu.cfs_quota_us"
+var cpuPeriodFileName = "cpu.cfs_period_us"
 var cpusetLimitsFileName = "cpuset.cpus"
 
 /*
