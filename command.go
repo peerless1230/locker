@@ -61,13 +61,13 @@ var runCommand = cli.Command{
 		if len(context.Args()) < 1 {
 			return fmt.Errorf("Missing container command")
 		}
-		cmd := context.Args().Get(0)
 		tty := (context.Bool("i") && context.Bool("t") || context.Bool("it"))
-
-		if context.Args().Get(1) != "" {
-			Run(tty, cmd, context.Args()[1:])
+		var cmdArray []string
+		// copy Context args
+		for _, arg := range context.Args() {
+			cmdArray = append(cmdArray, arg)
 		}
-		Run(tty, cmd, []string{})
+		Run(tty, cmdArray)
 		return nil
 
 	},
@@ -78,10 +78,8 @@ var initCommand = cli.Command{
 	Usage: `Init the Docker-liked container and run user's commands
 			locker init [command]`,
 	Action: func(context *cli.Context) error {
-		log.Infof("init started:")
-		args := context.Args().Get(0)
-		log.Infof("Command: %s", args)
-		err := container.NewContainerInitProcess(args)
+		log.Infof("Init process started:")
+		err := container.NewContainerInitProcess()
 		return err
 	},
 }

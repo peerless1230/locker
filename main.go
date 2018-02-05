@@ -18,6 +18,7 @@ func main() {
 		initCommand,
 	}
 	app.Before = func(context *cli.Context) error {
+		log.SetLevel(log.DebugLevel)
 		log.SetFormatter(&log.JSONFormatter{})
 		log.SetOutput(os.Stdout)
 		return nil
