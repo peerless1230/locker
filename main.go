@@ -12,12 +12,14 @@ import (
 func main() {
 	app := cli.NewApp()
 	app.Name = "locker"
+	// app.EnableBashCompletion = true
 	app.Usage = "Imitate Docker to trace it's mechanism"
 	app.Commands = []cli.Command{
 		runCommand,
 		initCommand,
 	}
 	app.Before = func(context *cli.Context) error {
+		log.SetLevel(log.DebugLevel)
 		log.SetFormatter(&log.JSONFormatter{})
 		log.SetOutput(os.Stdout)
 		return nil

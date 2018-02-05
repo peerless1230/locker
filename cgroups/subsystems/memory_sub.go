@@ -39,7 +39,7 @@ func (subsys *MemorySubSystem) Set(cgroupPath string, res *ResourceLimitConfig) 
 		if res.MemoryLimits != "" {
 			limitsFilePath := path.Join(subsysCgroupPath, memoryLimitsFileName)
 			if err := ioutil.WriteFile(limitsFilePath, []byte(res.MemoryLimits), 0644); err == nil {
-				log.Debugf("Write memory Limits: %s to %s", res.MemoryLimits, limitsFilePath)
+				log.Debugf("Write memory Limits: %s to %s", []byte(res.MemoryLimits), limitsFilePath)
 			} else {
 				return fmt.Errorf("Set memory limits failed: %v", err)
 			}
@@ -100,7 +100,7 @@ func (subsys *MemorySubSystem) Apply(cgroupPath string, pid int) error {
 			taskFile.WriteString(string('\n'))
 		}
 		taskFile.WriteString(strconv.Itoa(pid))
-		log.Debugf("Write pid(%s)into tasks:", pid)
+		log.Debugf("Write pid(%d) into tasks:", pid)
 		taskFile.Sync()
 	}
 	return nil

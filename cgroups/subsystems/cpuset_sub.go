@@ -100,7 +100,7 @@ func (subsys *CpusetSubSystem) Apply(cgroupPath string, pid int) error {
 			taskFile.WriteString(string('\n'))
 		}
 		taskFile.WriteString(strconv.Itoa(pid))
-		log.Debugf("Write pid(%s)into tasks:", pid)
+		log.Debugf("Write pid(%d) into tasks:", pid)
 		taskFile.Sync()
 	}
 	return nil

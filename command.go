@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"github.com/peerless1230/locker/container"
-
 	log "github.com/Sirupsen/logrus"
+	"github.com/peerless1230/locker/cgroups/subsystems"
+	"github.com/peerless1230/locker/container"
 	"github.com/urfave/cli"
 )
 
@@ -14,7 +14,7 @@ var runCommand = cli.Command{
 	//Usage: "Create a Docker-liked container\nlocker run -it [command],
 	Usage: `Create a Docker-liked container
 		locker run -[option, -option] [command]`,
-
+	UseShortOptionHandling: true,
 	Flags: []cli.Flag{
 		cli.BoolFlag{
 			Name:  "t",
@@ -24,35 +24,31 @@ var runCommand = cli.Command{
 			Name:  "i",
 			Usage: "enable interactive to container",
 		},
-		cli.BoolFlag{
-			Name:  "it",
+		/*cli.BoolFlag{
+			Name:  "ti",
 			Usage: "enable interactive tty to container",
-		},
-		cli.BoolFlag{
-			Name:  "m",
+		},*/
+		cli.StringFlag{
+			Name:  "memory, m",
 			Usage: "Memory limit",
 		},
-		cli.BoolFlag{
-			Name:  "memory",
-			Usage: "Memory limit",
-		},
-		cli.BoolFlag{
+		cli.StringFlag{
 			Name:  "cpu-shares",
 			Usage: "CPU shares (relative weight)",
 		},
-		cli.BoolFlag{
+		cli.StringFlag{
 			Name:  "cpuset-cpus",
 			Usage: " CPUs in which to allow execution (0-3, 0,1)",
 		},
-		cli.BoolFlag{
+		cli.StringFlag{
 			Name:  "cpu-period",
 			Usage: "Limit CPU CFS (Completely Fair Scheduler) period",
 		},
-		cli.BoolFlag{
+		cli.StringFlag{
 			Name:  "cpu-quota",
 			Usage: "Limit CPU CFS (Completely Fair Scheduler) quota",
 		},
-		cli.BoolFlag{
+		cli.StringFlag{
 			Name:  "cpus",
 			Usage: `Number of CPU. This is the equivalent of setting --cpu-period="100000" and --cpu-quota="n*100000"`,
 		},
@@ -61,13 +57,29 @@ var runCommand = cli.Command{
 		if len(context.Args()) < 1 {
 			return fmt.Errorf("Missing container command")
 		}
-		cmd := context.Args().Get(0)
-		tty := (context.Bool("i") && context.Bool("t") || context.Bool("it"))
-
-		if context.Args().Get(1) != "" {
-			Run(tty, cmd, context.Args()[1:])
+		tty := context.Bool("i") && context.Bool("t")
+		//tty := context.Bool("ti")
+		var cmdArray []string
+		// copy Context args
+		for _, arg := range context.Args() {
+			cmdArray = append(cmdArray, arg)
 		}
-		Run(tty, cmd, []string{})
+		/*var memLimit string
+		if context.String("m") == "" {
+			memLimit = context.String("memory")
+		} else {
+			memLimit = context.String("m")
+		}*/
+
+		resLimits := subsystems.ResourceLimitConfig{
+			MemoryLimits: context.String("m"),
+			CPUS:         context.String("cpus"),
+			CPUPeriod:    context.String("cpu-period"),
+			CPUQuota:     context.String("cpu-quota"),
+			CPUSet:       context.String("cpuset-cpus"),
+			CPUShare:     context.String("cpu-shares"),
+		}
+		Run(tty, cmdArray, &resLimits)
 		return nil
 
 	},
@@ -78,10 +90,8 @@ var initCommand = cli.Command{
 	Usage: `Init the Docker-liked container and run user's commands
 			locker init [command]`,
 	Action: func(context *cli.Context) error {
-		log.Infof("init started:")
-		args := context.Args().Get(0)
-		log.Infof("Command: %s", args)
-		err := container.NewContainerInitProcess(args)
+		log.Infof("Init process started:")
+		err := container.NewContainerInitProcess()
 		return err
 	},
 }
