@@ -8,6 +8,7 @@ import (
 	"github.com/peerless1230/locker/cgroups"
 	"github.com/peerless1230/locker/cgroups/subsystems"
 	"github.com/peerless1230/locker/common"
+	"github.com/syndtr/gocapability/capability"
 
 	"github.com/peerless1230/locker/container"
 )
@@ -40,13 +41,16 @@ func Run(tty bool, cmdArray []string, res *subsystems.ResourceLimitConfig) {
 	if err := parent.Start(); err != nil {
 		log.Error(err)
 	}
-
+	pid, err := capability.NewPid(os.Getpid())
+	if err != nil {
+		log.Debugf("Set %d CAP_SETGID to setgroup error: %v", pid, err)
+	}
 	cgroupManager := cgroups.NewCgroupManager("locker")
 	defer cgroupManager.Destroy()
 	cgroupManager.Set(res)
 	cgroupManager.Apply(parent.Process.Pid)
 	sendInitCommand(cmdArray, writePipe)
-	err := parent.Wait()
+	err = parent.Wait()
 	common.CheckError(err)
 	log.Debugf("Parent process exited.")
 	os.Exit(0)

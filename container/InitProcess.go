@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"unicode"
@@ -12,6 +13,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/peerless1230/locker/common"
 )
+
+var tempRootfs = ".put_old" // temp path for put_out rootfs
 
 /*
 NewPipe is used to create a pipe, if the pipe create failed,
@@ -57,14 +60,11 @@ func NewContainerInitProcess() error {
 		return fmt.Errorf("Get init commmand error, there is not any command")
 	}
 
-	log.Debugf("SetHostname")
+	setUpSystemMount()
+
+	/*log.Debugf("SetHostname")
 	common.CheckError(syscall.Sethostname([]byte("locker-container")))
-	log.Debugf("Chroot")
-	common.CheckError(syscall.Chroot("/home/encore/alpine_stress"))
-	common.CheckError(os.Chdir("/"))
-	mountFlags := syscall.MS_NOEXEC | syscall.MS_NODEV | syscall.MS_NOSUID
-	log.Infof("Mount /proc")
-	syscall.Mount("proc", "proc", "proc", uintptr(mountFlags), "")
+	*/
 	// find the command's path from system PATH
 	cmdPath, err := exec.LookPath(commands[0])
 	if err != nil {
@@ -76,4 +76,69 @@ func NewContainerInitProcess() error {
 	log.Infof("Umount /proc")
 	syscall.Unmount("proc", 0)
 	return nil
+}
+
+/*
+pivotRoot use syscall.pivotRoot to change the rootfs
+then umount put_old.
+Params: rootPath string
+Return: error
+*/
+func pivotRoot(rootPath string) error {
+	// remount new-rootfs and change it's fstype
+	log.Debugf("Remouning new-rootfs.")
+
+	if err := syscall.Mount(rootPath, rootPath, "bind", syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
+		return fmt.Errorf("Remount rootfs to itself error: %v", err)
+	}
+	pivotPath := filepath.Join(rootPath, tempRootfs)
+
+	if err := common.MkdirAll(pivotPath); err != nil {
+		return err
+	}
+	log.Debugf("Starting PivotRoot.")
+	if err := syscall.PivotRoot(rootPath, pivotPath); err != nil {
+		return fmt.Errorf("PivotRoot %s to %s error: %v", rootPath, pivotPath, err)
+	}
+	if err := syscall.Chdir("/"); err != nil {
+		return fmt.Errorf("Chdir to / error: %v", err)
+	}
+
+	pivotPath = filepath.Join("/", tempRootfs)
+	// umount old_rootfs with waiting it's busy state flag
+	if err := syscall.Unmount(pivotPath, syscall.MNT_DETACH); err != nil {
+		return fmt.Errorf("Unmount old_rootfs error: %v", err)
+	}
+	err := syscall.Rmdir(pivotPath)
+	log.Debugf("Removing %s", pivotPath)
+	return err
+}
+
+/*
+setUpSystemMount mount /proc and /dev
+Params:
+Return: error
+*/
+func setUpSystemMount() {
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Errorf("Get current dir error: %v", err)
+	}
+	log.Debugf("Local dir is %s", pwd)
+	pivotRoot(pwd)
+
+	mountFlags := syscall.MS_NOEXEC | syscall.MS_NODEV | syscall.MS_NOSUID
+	log.Debugf("Mount /proc")
+	if err := syscall.Mount("proc", "/proc", "proc", uintptr(mountFlags), ""); err != nil {
+		log.Debugf("Mount /proc error: %v", err)
+
+	}
+
+	log.Debugf("Mount /dev")
+	mountFlags = syscall.MS_STRICTATIME | syscall.MS_NOSUID
+	if syscall.Mount("tmpfs", "/dev", "tmpfs", uintptr(mountFlags), ""); err != nil {
+		log.Debugf("Mount /dev error: %v", err)
+
+	}
+
 }

@@ -37,9 +37,24 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 
 	cmd := exec.Command("/proc/self/exe", "init")
 
+	// add SysProcAttrs set root user for container Init process
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags: syscall.CLONE_NEWNS | syscall.CLONE_NEWUTS |
+		Cloneflags: syscall.CLONE_NEWNS | syscall.CLONE_NEWUTS | syscall.CLONE_NEWUSER |
 			syscall.CLONE_NEWPID | syscall.CLONE_NEWNET | syscall.CLONE_NEWIPC,
+		UidMappings: []syscall.SysProcIDMap{
+			{
+				ContainerID: 0,
+				HostID:      0,
+				Size:        1,
+			},
+		},
+		GidMappings: []syscall.SysProcIDMap{
+			{
+				ContainerID: 0,
+				HostID:      0,
+				Size:        1,
+			},
+		},
 	}
 	if tty {
 		cmd.Stdin = os.Stdin
@@ -47,6 +62,7 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 		cmd.Stderr = os.Stderr
 		log.Debugf("tty is enabled")
 	}
+	cmd.Dir = "/home/encore/alpine_stress"
 	cmd.ExtraFiles = []*os.File{readPipe}
 	return cmd, writePipe
 }
