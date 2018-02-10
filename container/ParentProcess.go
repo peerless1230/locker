@@ -44,14 +44,14 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 		UidMappings: []syscall.SysProcIDMap{
 			{
 				ContainerID: 0,
-				HostID:      0,
+				HostID:      syscall.Getuid(),
 				Size:        1,
 			},
 		},
 		GidMappings: []syscall.SysProcIDMap{
 			{
 				ContainerID: 0,
-				HostID:      0,
+				HostID:      syscall.Getuid(),
 				Size:        1,
 			},
 		},
