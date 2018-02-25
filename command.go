@@ -24,10 +24,10 @@ var runCommand = cli.Command{
 			Name:  "i",
 			Usage: "enable interactive to container",
 		},
-		/*cli.BoolFlag{
-			Name:  "ti",
-			Usage: "enable interactive tty to container",
-		},*/
+		cli.StringSliceFlag{
+			Name:  "volume, v",
+			Usage: "Mount volume '/host/path:/container/path'",
+		},
 		cli.StringFlag{
 			Name:  "memory, m",
 			Usage: "Memory limit",
@@ -58,19 +58,14 @@ var runCommand = cli.Command{
 			return fmt.Errorf("Missing container command")
 		}
 		tty := context.Bool("i") && context.Bool("t")
-		//tty := context.Bool("ti")
+
 		var cmdArray []string
 		// copy Context args
 		for _, arg := range context.Args() {
 			cmdArray = append(cmdArray, arg)
 		}
-		/*var memLimit string
-		if context.String("m") == "" {
-			memLimit = context.String("memory")
-		} else {
-			memLimit = context.String("m")
-		}*/
 
+		log.Debugf("Volumes: %v", context.StringSlice("v"))
 		resLimits := subsystems.ResourceLimitConfig{
 			MemoryLimits: context.String("m"),
 			CPUS:         context.String("cpus"),

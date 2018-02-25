@@ -183,3 +183,30 @@ func mountOverlayFS(layerPath string) {
 		os.Exit(7)
 	}
 }
+
+/*
+CleanUpOverlayFS is used to create a pipe, if the pipe create failed,
+it return nil, nil, err to avoid more risks on pipe operations.
+Params: ayerPath string
+Return:
+*/
+func CleanUpOverlayFS(layerPath string) {
+	umountOverlayFS(layerPath)
+	removeOverlayFS(layerPath)
+}
+
+// umount OverlayFS layers
+func umountOverlayFS(layerPath string) {
+	mergedLayer := filepath.Join(layerPath, mergedLAYER)
+
+	if err := syscall.Unmount(mergedLayer, 0); err != nil {
+		log.Errorf("Unmount container's OverlayFS error: %v", err)
+	}
+}
+
+// remove OverlayFS layers
+func removeOverlayFS(layerPath string) {
+	mergedLayer := filepath.Join(layerPath, mergedLAYER)
+	common.RmdirAll(mergedLayer)
+	common.RmdirAll(layerPath)
+}

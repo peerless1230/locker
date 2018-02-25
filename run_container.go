@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -12,6 +13,8 @@ import (
 
 	"github.com/peerless1230/locker/container"
 )
+
+const rootLAYER = "/var/lib/locker/overlay2/"
 
 /*
 Run is used to Run the command given to container
@@ -45,14 +48,19 @@ func Run(tty bool, cmdArray []string, res *subsystems.ResourceLimitConfig) {
 	if err != nil {
 		log.Debugf("Set %d CAP_SETGID to setgroup error: %v", pid, err)
 	}
+
 	cgroupManager := cgroups.NewCgroupManager("locker")
 	defer cgroupManager.Destroy()
 	cgroupManager.Set(res)
 	cgroupManager.Apply(parent.Process.Pid)
 	sendInitCommand(cmdArray, writePipe)
 	err = parent.Wait()
+
+	containerID := "92745277a8b052e2c50cf757da7140afabd9f6abbae7b6d6516f944a55658dfc"
+	layerPath := filepath.Join(rootLAYER, containerID)
+	container.CleanUpOverlayFS(layerPath)
 	common.CheckError(err)
-	log.Debugf("Parent process exited.")
+	log.Debugf("Parent process exited .")
 	os.Exit(0)
 }
 

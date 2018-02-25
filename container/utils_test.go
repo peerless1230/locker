@@ -3,6 +3,8 @@ package container
 import (
 	"path/filepath"
 	"testing"
+
+	"github.com/peerless1230/locker/common"
 )
 
 func TestCreateDiffLayer(t *testing.T) {
@@ -12,6 +14,8 @@ func TestCreateDiffLayer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("createDiffLayer failed: %v", err)
 	}
+	diffLayer := filepath.Join(layerPath, diffLAYER)
+	common.RmdirAll(diffLayer)
 }
 
 func TestCreateMergedLayer(t *testing.T) {
@@ -21,4 +25,6 @@ func TestCreateMergedLayer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("createMergedLayer failed: %v", err)
 	}
+	mergedLayer := filepath.Join(layerPath, mergedLAYER)
+	common.RmdirAll(mergedLayer)
 }
