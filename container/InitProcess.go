@@ -93,7 +93,7 @@ func pivotRoot(rootPath string) error {
 	}
 	pivotPath := filepath.Join(rootPath, tempRootfs)
 
-	if err := common.MkdirAll(pivotPath); err != nil {
+	if err := common.MkdirAll(pivotPath, 0755); err != nil {
 		return err
 	}
 
