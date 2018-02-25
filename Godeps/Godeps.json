@@ -1,0 +1,33 @@
+{
+	"ImportPath": "github.com/peerless1230/locker",
+	"GoVersion": "go1.9",
+	"GodepVersion": "v80",
+	"Deps": [
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v1.0.4",
+			"Rev": "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
+		},
+		{
+			"ImportPath": "github.com/syndtr/gocapability/capability",
+			"Rev": "db04d3cc01c8b54962a58ec7e491717d06cfcc16"
+		},
+		{
+			"ImportPath": "github.com/urfave/cli",
+			"Comment": "v1.20.0-49-g39908eb",
+			"Rev": "39908eb08fee7c10d842622a114a5c133fb0a3c6"
+		},
+		{
+			"ImportPath": "golang.org/x/crypto/ssh/terminal",
+			"Rev": "d585fd2cc9195196078f516b69daff6744ef5e84"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "83801418e1b59fb1880e363299581ee543af32ca"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/windows",
+			"Rev": "83801418e1b59fb1880e363299581ee543af32ca"
+		}
+	]
+}
