@@ -74,7 +74,7 @@ func NewContainerInitProcess() error {
 	log.Debugf("Found command in %s", cmdPath)
 	syscall.Exec(cmdPath, commands, os.Environ())
 	log.Infof("Umount /proc")
-	syscall.Unmount("proc", 0)
+	syscall.Unmount("proc", syscall.MNT_DETACH)
 	return nil
 }
 

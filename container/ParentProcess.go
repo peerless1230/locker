@@ -41,10 +41,10 @@ func NewPipe() (*os.File, *os.File, error) {
 
 /*
 NewParentProcess is used to create the parent process of container
-Params: tty bool
+Params: tty bool, volumeSlice []string
 Return: *exec.Cmd, *os.File
 */
-func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volumeSlice []string) (*exec.Cmd, *os.File) {
 	// here changed to use pipe pass params to InitProcess.
 	readPipe, writePipe, err := NewPipe()
 	if err != nil {
@@ -82,6 +82,7 @@ func NewParentProcess(tty bool) (*exec.Cmd, *os.File) {
 	containerID := "92745277a8b052e2c50cf757da7140afabd9f6abbae7b6d6516f944a55658dfc"
 	layerPath := filepath.Join(rootLAYER, containerID)
 	createOverlayLayers(layerPath)
+	mountVolumes(volumeSlice, layerPath)
 	mergedDir := filepath.Join(layerPath, mergedLAYER)
 	cmd.Dir = mergedDir
 	cmd.ExtraFiles = []*os.File{readPipe}
@@ -185,9 +186,8 @@ func mountOverlayFS(layerPath string) {
 }
 
 /*
-CleanUpOverlayFS is used to create a pipe, if the pipe create failed,
-it return nil, nil, err to avoid more risks on pipe operations.
-Params: ayerPath string
+CleanUpOverlayFS is used to umount, then remove OverlayFS layers.
+Params: layerPath string
 Return:
 */
 func CleanUpOverlayFS(layerPath string) {
@@ -199,7 +199,7 @@ func CleanUpOverlayFS(layerPath string) {
 func umountOverlayFS(layerPath string) {
 	mergedLayer := filepath.Join(layerPath, mergedLAYER)
 
-	if err := syscall.Unmount(mergedLayer, 0); err != nil {
+	if err := syscall.Unmount(mergedLayer, syscall.MNT_DETACH); err != nil {
 		log.Errorf("Unmount container's OverlayFS error: %v", err)
 	}
 }
@@ -209,4 +209,69 @@ func removeOverlayFS(layerPath string) {
 	mergedLayer := filepath.Join(layerPath, mergedLAYER)
 	common.RmdirAll(mergedLayer)
 	common.RmdirAll(layerPath)
+}
+
+//  mount container's OverlayFS on merged dir
+func mountVolumes(volumeSlice []string, layerPath string) {
+	volumeMap := parseVolumeSlice(volumeSlice, layerPath)
+	createVolumeDirs(volumeMap)
+}
+
+// parse the slice of volumes from cli flags
+func parseVolumeSlice(volumeSlice []string, layerPath string) map[string]string {
+	mergedLayer := filepath.Join(layerPath, mergedLAYER)
+
+	var volumes = make(map[string]string)
+	for _, ele := range volumeSlice {
+		volTemp := strings.Split(ele, ":")
+		volumes[volTemp[0]] = filepath.Join(mergedLayer, volTemp[1])
+	}
+	return volumes
+}
+
+// create Volumes for container
+func createVolumeDirs(volumeMap map[string]string) {
+	for k, v := range volumeMap {
+		parentDir := k
+		if isExist, _ := common.IsPathOrFileExists(parentDir); isExist == false {
+			common.MkdirAll(parentDir, 0755)
+		}
+		containerDir := v
+		if isExist, _ := common.IsPathOrFileExists(containerDir); isExist == false {
+			common.MkdirAll(containerDir, 0755)
+		}
+		mountFlags := syscall.MS_RELATIME | syscall.MS_BIND | syscall.MS_REC
+
+		syscall.Mount(parentDir, containerDir, "bind", uintptr(mountFlags), "")
+	}
+
+}
+
+/*
+CleanUpVolumes is used to umount, then remove
+Params: volumes map[string]string
+Return:
+*/
+func CleanUpVolumes(volumes []string, layerPath string) {
+	volumeMap := parseVolumeSlice(volumes, layerPath)
+	umountVolumes(volumeMap)
+	removeVolumes(volumeMap)
+}
+
+// umount Volumes
+func umountVolumes(volumeMap map[string]string) {
+	for _, v := range volumeMap {
+		log.Debugf("Unmount the container's volume on: %v.", v)
+		if err := syscall.Unmount(v, syscall.MNT_DETACH); err != nil {
+			log.Errorf("Unmount container's volume error: %v", err)
+		}
+	}
+}
+
+// remove Volumes
+func removeVolumes(volumeMap map[string]string) {
+	for _, v := range volumeMap {
+		// remove dirs of volumes
+		common.RmdirAll(v)
+	}
 }

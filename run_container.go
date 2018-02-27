@@ -31,11 +31,11 @@ func sendInitCommands(cmdArray []string, writePipe *os.File) {
 
 /*
 Run is used to Run the command given to container
-Params: tty bool, command string, args []string
-Return: error
+Params: tty bool, cmdArray []string, res *subsystems.ResourceLimitConfig, volumeSlice []string
+Return:
 */
-func Run(tty bool, cmdArray []string, res *subsystems.ResourceLimitConfig) {
-	parent, writePipe := container.NewParentProcess(tty)
+func Run(tty bool, cmdArray []string, res *subsystems.ResourceLimitConfig, volumeSlice []string) {
+	parent, writePipe := container.NewParentProcess(tty, volumeSlice)
 	// check parent process inited successfully.
 	if parent == nil {
 		log.Errorf("New parent process error")
@@ -58,6 +58,7 @@ func Run(tty bool, cmdArray []string, res *subsystems.ResourceLimitConfig) {
 
 	containerID := "92745277a8b052e2c50cf757da7140afabd9f6abbae7b6d6516f944a55658dfc"
 	layerPath := filepath.Join(rootLAYER, containerID)
+	container.CleanUpVolumes(volumeSlice, layerPath)
 	container.CleanUpOverlayFS(layerPath)
 	common.CheckError(err)
 	log.Debugf("Parent process exited .")

@@ -74,7 +74,7 @@ var runCommand = cli.Command{
 			CPUSet:       context.String("cpuset-cpus"),
 			CPUShare:     context.String("cpu-shares"),
 		}
-		Run(tty, cmdArray, &resLimits)
+		Run(tty, cmdArray, &resLimits, context.StringSlice("v"))
 		return nil
 
 	},
