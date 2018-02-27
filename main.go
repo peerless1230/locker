@@ -19,6 +19,7 @@ func main() {
 	app.Commands = []cli.Command{
 		runCommand,
 		initCommand,
+		listCommand,
 	}
 	app.Before = func(context *cli.Context) error {
 		log.SetLevel(log.DebugLevel)

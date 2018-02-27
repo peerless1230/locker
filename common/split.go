@@ -17,3 +17,22 @@ func SplitArgs(args []string) []string {
 	}
 	return argv
 }
+
+/*
+SubStringN is used to return substring by the given number n.
+Params: s string, n int
+Return: string
+*/
+func SubStringN(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	str, rs := "", []rune(s)
+	for _, r := range rs {
+		if len(str) > n {
+			break
+		}
+		str += string(r)
+	}
+	return str
+}

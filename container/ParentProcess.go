@@ -14,16 +14,42 @@ import (
 	"github.com/peerless1230/locker/common"
 )
 
-const dockerLayer = "/var/lib/docker/overlay2/"
-const rootLAYER = "/var/lib/locker/overlay2/"
-const diffLAYER = "diff"
-const workLAYER = "work"
-const mergedLAYER = "merged"
+const (
+	dockerLayer = "/var/lib/docker/overlay2/"
+	rootLAYER   = "/var/lib/locker/overlay2/"
+	diffLAYER   = "diff"
+	workLAYER   = "work"
+	mergedLAYER = "merged"
+	// ubuntuImageLayer should be replace as the Docker Overlay2 Image you want to use.
+	ubuntuImageLayer = "/var/lib/docker/overlay2/4ee6de34917e8c8afa0ce2b09ccf5bf453fba42af9829b9bad7222f3e9c0ec9d"
+	linkFile         = "link"
+	lowerFile        = "lower"
+)
 
-// ubuntuImageLayer should be replace as the Docker Overlay2 Image you want to use.
-const ubuntuImageLayer = "/var/lib/docker/overlay2/4ee6de34917e8c8afa0ce2b09ccf5bf453fba42af9829b9bad7222f3e9c0ec9d"
-const linkFile = "link"
-const lowerFile = "lower"
+const (
+	// RUNNING status
+	RUNNING = "running"
+	// STOP status
+	STOP = "stopped"
+	// EXIT status
+	EXIT = "exited"
+	// DefaultInfoLocation is default path for container's info
+	DefaultInfoLocation = "/var/lib/locker/container/%s/"
+	// ConfigName is default config filename
+	ConfigName = "config.json"
+)
+
+/*
+Info is used for container information.
+*/
+type Info struct {
+	Pid         string `json:"pid"`        //PID of container init process
+	ID          string `json:"id"`         //ID of container
+	Name        string `json:"name"`       //name of container
+	Command     string `json:"command"`    //command of container
+	CreatedTime string `json:"createTime"` //create time of container
+	Status      string `json:"status"`     //status of container
+}
 
 /*
 NewPipe is used to create a pipe, if the pipe create failed,
@@ -44,7 +70,7 @@ NewParentProcess is used to create the parent process of container
 Params: tty bool, volumeSlice []string
 Return: *exec.Cmd, *os.File
 */
-func NewParentProcess(tty bool, volumeSlice []string) (*exec.Cmd, *os.File) {
+func NewParentProcess(tty bool, volumeSlice []string, containerID string) (*exec.Cmd, *os.File) {
 	// here changed to use pipe pass params to InitProcess.
 	readPipe, writePipe, err := NewPipe()
 	if err != nil {
@@ -79,7 +105,6 @@ func NewParentProcess(tty bool, volumeSlice []string) (*exec.Cmd, *os.File) {
 		cmd.Stderr = os.Stderr
 		log.Debugf("tty is enabled")
 	}
-	containerID := "92745277a8b052e2c50cf757da7140afabd9f6abbae7b6d6516f944a55658dfc"
 	layerPath := filepath.Join(rootLAYER, containerID)
 	createOverlayLayers(layerPath)
 	mountVolumes(volumeSlice, layerPath)

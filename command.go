@@ -5,6 +5,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/peerless1230/locker/cgroups/subsystems"
+	"github.com/peerless1230/locker/common"
 	"github.com/peerless1230/locker/container"
 	"github.com/urfave/cli"
 )
@@ -27,6 +28,10 @@ var runCommand = cli.Command{
 		cli.StringSliceFlag{
 			Name:  "volume, v",
 			Usage: "Mount volume '/host/path:/container/path'",
+		},
+		cli.StringFlag{
+			Name:  "name",
+			Usage: "Assign a name to the container",
 		},
 		cli.StringFlag{
 			Name:  "memory, m",
@@ -64,8 +69,13 @@ var runCommand = cli.Command{
 		for _, arg := range context.Args() {
 			cmdArray = append(cmdArray, arg)
 		}
-
+		var name string
+		if name = context.String("name"); name == "" {
+			name = common.RandomName()
+		}
 		log.Debugf("Volumes: %v", context.StringSlice("v"))
+		log.Debugf("Name: %v", name)
+
 		resLimits := subsystems.ResourceLimitConfig{
 			MemoryLimits: context.String("m"),
 			CPUS:         context.String("cpus"),
@@ -74,7 +84,7 @@ var runCommand = cli.Command{
 			CPUSet:       context.String("cpuset-cpus"),
 			CPUShare:     context.String("cpu-shares"),
 		}
-		Run(tty, cmdArray, &resLimits, context.StringSlice("v"))
+		Run(tty, cmdArray, &resLimits, context.StringSlice("v"), name)
 		return nil
 
 	},
@@ -88,5 +98,14 @@ var initCommand = cli.Command{
 		log.Infof("Init process started:")
 		err := container.NewContainerInitProcess()
 		return err
+	},
+}
+
+var listCommand = cli.Command{
+	Name:  "ps",
+	Usage: "list all the containers",
+	Action: func(context *cli.Context) error {
+		ListContainers()
+		return nil
 	},
 }
